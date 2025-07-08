@@ -1,0 +1,71 @@
+/*
+Problem: Painter Partition Problem
+Approach: Binary Search + Greedy
+Time Complexity: O(n * log(sum))
+Space Complexity: O(1)
+Tags: Binary Search on Answer, Greedy, Optimization
+Status: ✅ Solved
+*/
+
+#include <iostream>
+using namespace std;
+// Function to check if it's possible to paint all boards
+// using <= k painters such that no painter paints more than 'mid' units
+bool isvalid(int arr[], int k, int n, int mid) {
+    int painter = 1;          // Start with 1 painter
+    long long boards = 0;     // Current painted board length
+
+    for(int i = 0; i < n; i++) {
+        // If a single board is larger than 'mid', it's impossible
+        if((long long)arr[i] > mid) return false;
+
+        // Add current board to current painter's workload if it fits
+        if(boards + arr[i] <= mid) {
+            boards += arr[i];
+        } else {
+            // Otherwise, assign board to next painter
+            painter++;
+            boards = arr[i];
+        }
+    }
+
+    // Return true if number of painters used is within limit
+    return (painter <= k);
+}
+
+int main() {
+    int arr[] = {80, 70, 60, 50};  // Length of each board
+    int k = 2;                     // Number of painters
+    int n = sizeof(arr) / sizeof(arr[0]);  // Total boards
+
+    // Edge case: not enough boards for painters
+    if(n < k) {
+        cout << -1;
+        return 0;
+    }
+
+    // Calculate total sum of all boards
+    int sum = 0;
+    for(int i = 0; i < n; i++) {
+        sum += arr[i];
+    }
+
+    // Binary search on answer: possible max workload per painter
+    int st = 0, end = sum, ans = -1;
+
+    while(st <= end) {
+        int mid = st + (end - st) / 2;
+
+        // If valid allocation possible with max workload = mid
+        if(isvalid(arr, k, n, mid)) {
+            ans = mid;         // Update answer
+            end = mid - 1;     // Try smaller value (optimize further)
+        } else {
+            st = mid + 1;      // Try higher workload
+        }
+    }
+
+    // Print minimum possible maximum workload among painters
+    cout << ans;
+    return 0;
+}
